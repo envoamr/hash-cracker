@@ -7,9 +7,12 @@ from datetime import datetime
 import hashop
 import time
 
+# the user entered the path to the wordlist relative to his/her current working directory
 curr_dir = PurePath(Path.cwd())
 
 to_hash = {
+    "lm": hashop.to_lmhash,
+    "ntlm": hashop.to_nthash,
     "md4": hashop.to_md4,
     "md5": hashop.to_md5,
     "sha1": hashop.to_sha1,
@@ -17,8 +20,18 @@ to_hash = {
     "sha512": hashop.to_sha512,
 }
 
+check_hash = {
+    "lm": hashop.check_lmhash,
+    "ntlm": hashop.check_nthash,
+    "md4": hashop.check_md4,
+    "md5": hashop.check_md5,
+    "sha1": hashop.check_sha1,
+    "sha256": hashop.check_sha256,
+    "sha512": hashop.check_sha512,
+}
 
-def single(type, hash, wordlist):
+
+def single(type, hash_str, wordlist):
     """Attempts to crack the given hash by comparing it to strings from the
     provided wordlist.
 
@@ -47,7 +60,7 @@ def single(type, hash, wordlist):
         for line in wordlist_f:
             checked += 1
             line = line.rstrip("\n")
-            if to_hash[type](line) == hash:
+            if check_hash[type](line, hash_str):
                 password = line
                 break
 
@@ -87,23 +100,23 @@ def multiple(type, hash_file, wordlist):
     print(f"\nCreated results file {results_path}")
     print(f"\nAttempting to crack the hashes in {Path(hash_file).resolve()}...\n")
 
-    stime = time.time()
     hash_num = 0
     cracked = 0
+    stime = time.time()
 
     # for each hash in the hashes file, loop through each word in the wordlist and
     # check if its hash matches
     with open(hashes_path, "r") as hash_f:
-        for hash in hash_f:
+        for hash_str in hash_f:
             hash_num += 1
-            hash = hash.rstrip("\n")
-            print(f"{hash_num} {hash}", end=" ")
+            hash_str = hash_str.rstrip("\n")
+            print(f"{hash_num} {hash_str}", end=" ")
 
             with open(wordlist_path, "r") as wordlist_f:
                 found = False
                 for pos_hash in wordlist_f:
                     pos_hash = pos_hash.rstrip("\n")
-                    if to_hash[type](pos_hash) == hash:
+                    if check_hash[type](pos_hash, hash_str):
                         found = True
                         break
 

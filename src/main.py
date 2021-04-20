@@ -19,10 +19,10 @@ def get_options():
     options.add_argument(
         "-t",
         "--hash-type",
-        help="type of hash from the following: md4, md5, sha1, sha256, sha512",
+        help="type of hash from the following: lm, ntlm, md4, md5, sha1, sha256, sha512",
         metavar="",
         required=True,
-        choices=["md4", "md5", "sha1", "sha256", "sha512"],
+        choices=["lm", "ntlm", "md4", "md5", "sha1", "sha256", "sha512"],
     )
     options.add_argument(
         "-w",
@@ -34,11 +34,13 @@ def get_options():
     )
 
     hash_group = options.add_mutually_exclusive_group(required=True)
-    hash_group.add_argument("-s", "--hash-string", help="string to crack", metavar="")
+    hash_group.add_argument(
+        "-s", "--hash-string", help="hash string to crack", metavar=""
+    )
     hash_group.add_argument(
         "-l",
         "--hash-list",
-        help="file path to hashes list",
+        help="file path to the list of hashes",
         metavar="",
         type=argparse.FileType("r"),
     )
@@ -48,7 +50,6 @@ def get_options():
 
 def main():
     """Gets command line arguments and calls the appropriate function to crack hash(es)"""
-    print(get_options.__doc__)
     get_options()
 
     # string hash given to crack
